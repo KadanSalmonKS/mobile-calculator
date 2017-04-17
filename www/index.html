@@ -1,0 +1,309 @@
+<!-- AUTHOR KADIAN SALMON
+31 JANUARY 2017
+THIS IS A SIMPLE CALCULATOR-->
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="viewport"
+content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi"/>
+<link rel="stylesheet" type="text/css" href="css/index.css" />
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+<meta name="msapplication-tap-highlight" content="no" />
+<title>Mobile Calculator</title>
+    
+<script src="js/jquery-3.1.1.js"></script>    
+<script src="cordova.js"></script>
+<script src="js/index.js"></script>
+<script src="js/angular.min.js"></script>   
+    
+</head>
+<body onresize="dimensions();">
+    <script>
+	dimensions();
+</script>
+ <div class="main-content"><!--  container for centering content -->
+    
+ <div ng-app="K_Cal" ng-controller="CalculateControl">
+     
+     <div class="display-result">
+             <div class="PrimeOut">{{ans}}</div> 
+     
+             <div class="SecOut">{{output}}</div> 
+     </div>
+     
+     <div class="button-display">
+         
+         <div class="btn-num" ng-click="processClick(1);"><div class="btn-pad">1</div></div><div class="btn-num" ng-click="processClick(2);"><div class="btn-pad">2</div></div><div class="btn-num" ng-click="processClick(3);"><div class="btn-pad">3</div></div><div class="btn-num" ng-click="processClick(4);"><div class="btn-pad">4</div></div><div class="btn-num" ng-click="processClick(5);"><div class="btn-pad">5</div></div><div class="btn-num" ng-click="processClick(6);"><div class="btn-pad">6</div></div><div class="btn-num" ng-click="processClick(7);"><div class="btn-pad">7</div></div><div class="btn-num" ng-click="processClick(8);"><div class="btn-pad">8</div></div><div class="btn-num" ng-click="processClick(9);"><div class="btn-pad">9</div></div><div class="btn-num" ng-click="processClick('.');"><div class="btn-pad">.</div></div><div class="btn-num" ng-click="processClick(0);"><div class="btn-pad">0</div></div><div class="btn-num" ng-click="processClick('=');"><div class="btn-pad">=</div></div><div id="op" class="btn-num" ng-click="processClick('-');"><div class="btn-pad">-</div></div><div id="op" class="btn-num" ng-click="processClick('+');"><div class="btn-pad">+</div></div><div id="op" class="btn-num" ng-click="processClick('*');"><div class="btn-pad">*</div></div><div id="op" class="btn-num" ng-click="processClick('/');"><div class="btn-pad">/</div></div><div class="del" ng-click="processClick('d');"><div class="btn-pad">DEL</div></div><div class="cls" ng-click="processClick('c');" style="display:none;"><div class="btn-pad">CLS</div></div>
+     </div>
+     
+     
+     
+    
+ </div>
+ 
+</div><!-- END bootstrap container for centering content -->    
+ <script>
+     /* ANGULAR CALCULATOR CONTROLLER : KADIAN SALMON*/
+     
+        var helloApp = angular.module("K_Cal", []);//create module
+
+        helloApp.controller("CalculateControl", function($scope) {
+            $scope.ans = 0; // final output
+            $scope.output = '0'; // general output
+            $scope.num = []; // number operand string
+            $scope.op = ""; // operator
+            $scope.fin = 0;//1 if arithmetic operation is complete
+            $scope.fulstop = 0;
+            
+            $scope.processClick = function(key){
+                
+                //process numbers 
+                if(!isNaN(key) || key == '.'){//if key IS a number
+                    
+                    if($scope.fulstop == 1 && key == '.'){
+                        //if decimal exist and key is . then do nothing
+                         
+                        }
+                    else{
+                        
+                        if(key == '.'){
+                            $scope.fulstop = 1;
+                        }
+                        if($scope.op == ''){//if no operation needs to be performed
+                            if($scope.fin == 1 && $scope.num == ''){//if new operation erase all previous data
+                                del_clear('d');
+                                $scope.ans = 0;
+                                $scope.num = '';
+                                $scope.output = '';
+                                $scope.fin = 0;
+                                $scope.fulstop = 0;
+                            }
+                            if($scope.fin == 0 && $scope.output == '0'){//once we start.. remove 0 from output
+                                $scope.output = '';
+                            }
+
+
+                            $scope.num += key;
+                            $scope.output += key;
+
+                        }
+                        else{
+                            $scope.num += key;
+                            $scope.output += key;
+                        }
+                    }
+                }
+                else
+                if(isNaN(key) && key != '.'){//if key IS NOT a number
+                    
+                    switch(key){//switch
+                        case '+' : 
+                            processEqual($scope.op);//process calculation that is waiting to be processed
+                            if($scope.fin == 1){//if new operation then reset
+                                $scope.fin = 0;
+                                del_clear('d');
+                            }
+                            $scope.ans += Number($scope.num);//add number to ans store
+                            $scope.op = '+';//apply for add operation
+                            $scope.num = '';//reset number
+                            $scope.fulstop = 0;
+                            if($scope.op != ''){//if operation is awaiting
+                                $scope.output = '';//clear output
+                                $scope.output += $scope.ans + ' ' + key + ' ';//process the operation and put it in place
+                            }
+                            else
+                                $scope.output += key;//else just add the operator
+                        break;
+                        
+                        case '-' : 
+                            processEqual($scope.op);//process calculation that is waiting to be processed
+                            if($scope.fin == 1){//if new operation then reset
+                                $scope.fin = 0;
+                                del_clear('d');
+                            }
+                            $scope.ans += Number($scope.num);//add number to ans store
+                            $scope.op = '-';//apply for add operation
+                            $scope.num = '';//reset number
+                            $scope.fulstop = 0;
+                            if($scope.op != ''){//if operation is awaiting
+                                $scope.output = '';//clear output
+                                $scope.output += $scope.ans + ' ' + key + ' ';//process the operation and put it in place
+                            }
+                            else
+                                $scope.output += key;//else just add the operator
+                        break;
+                        
+                        case '*' : 
+                            processEqual($scope.op);//process calculation that is waiting to be processed
+                            if($scope.fin == 1){//if new operation then reset
+                                $scope.fin = 0;
+                                del_clear('d');
+                            }
+                            $scope.ans += Number($scope.num);
+                            $scope.op = '*';//apply for add operation
+                            $scope.num = '';//reset number
+                            $scope.fulstop = 0;
+                            if($scope.op != ''){//if operation is awaiting
+                                $scope.output = '';//clear output
+                                $scope.output += $scope.ans + ' ' + key + ' ';//process the operation and put it in place
+                            }
+                            else
+                                $scope.output += key;//else just add the operator
+                        break;
+                            
+                        case '/' : 
+                            processEqual($scope.op);//process calculation that is waiting to be processed
+                            if($scope.fin == 1){//if new operation then reset
+                                $scope.fin = 0;
+                                del_clear('d');
+                            }
+                            $scope.ans += Number($scope.num);
+                            $scope.op = '/';//apply for add operation
+                            $scope.num = '';//reset number
+                            $scope.fulstop = 0;
+                            if($scope.op != ''){//if operation is awaiting
+                                $scope.output = '';//clear output
+                                $scope.output += $scope.ans + ' ' + key + ' ';//process the operation and put it in place
+                            }
+                            else
+                                $scope.output += key;//else just add the operator
+                        break;
+                            
+                        case 'c' : //clear display
+                            $scope.ans = 0;
+                            $scope.op = '';//apply for add operation
+                            $scope.num = '';//reset number
+                            $scope.output = '0';
+                            $scope.fulstop = 0;
+                            del_clear('d');//change DEL button to CLS and back by hiding one and showing the other
+                        break;
+                        case 'd' : //delete char
+                            if($scope.output.length < 2){//if the user backspaces all the way.. leave a place holder
+                                $scope.output = '';//clear output
+                                $scope.output = '0';
+                                break;
+                            }
+                            if($scope.fin == 1)//disallow backspacing of results
+                                {
+                                    
+                                    break;
+                                }
+                           
+                            if($scope.num != ''){
+                                $scope.num = del($scope.num);
+                                $scope.output = del($scope.output);
+                            }
+                            else{
+                                $scope.op = '';
+                                $scope.op = '';
+                                $scope.output = del($scope.output);
+                            }
+                            
+                            
+                        break;
+                        case '=' :                             
+                            res = processEqual($scope.op);
+                            $scope.fin = 1;//tell system to reset for new
+                            if(res != 1){//if an operation was performed
+                                del_clear('c');//change DEL button to CLS and back by hiding one and showing the other
+                            }
+                            
+                        break;
+                    }//end switch
+                }
+                
+                function del_clear(but){//toggle between DEL and CLS
+                    if(but == 'c'){
+                        $(".cls").show();                        
+                        $(".del").hide(); 
+                        
+                    }
+                    else{
+                        $(".del").show();                        
+                        $(".cls").hide();
+                       
+                    }                
+                                    
+                }
+                function processEqual(operator){
+                    switch(operator){
+                                case '+':
+                                    $scope.ans += Number($scope.num);
+                                    $scope.op = '';//reset operator
+                                    $scope.num = '';//reset number
+                                    $scope.output += ' = ' + $scope.ans; 
+                                break;
+                                case '-':
+                                    $scope.ans -= Number($scope.num);
+                                    $scope.op = '';//reset operator
+                                    $scope.num = '';//reset number
+                                    $scope.output += ' = ' + $scope.ans; 
+                                break;
+                                case '*':
+                                    $scope.ans *= Number($scope.num);
+                                    $scope.op = '';//reset operator
+                                    $scope.num = '';//reset number
+                                    $scope.output += ' = ' + $scope.ans; //add text to output string
+                                break;
+                                case '/':
+                                    $scope.ans /= Number($scope.num);
+                                    $scope.op = '';//reset operator
+                                    $scope.num = '';//reset number
+                                    $scope.output += ' = ' + $scope.ans; //add text to output string
+                                    
+                                break;
+                                default:
+                                    return 1;//happens if no operations were performed
+                                break;
+                            }
+                }
+            }//end function
+        });//create controller called HelloCtrl
+
+        function del(word){//remove the last letter of a string
+            var newword = [];//array for new word
+            var x;//counter
+            for(x=0;x<word.length-1;x++){//go up to the second to last letter
+                newword[x] = word[x];//copy the word to newword
+            }
+            return newword.join('');//conver newword array: w,o,r,d to string: word
+        }
+    </script>
+    
+    <script>
+        dimensions();
+        
+        function dimensions(){
+            
+           // $(document).ready(function(){
+                var body_height = $(document).outerHeight();
+                var body_width = $(document).outerWidth();
+                var btn_height = 0.7 * body_height;
+                var display_height = 0.3 * body_height;
+                $(".main-content").height(body_height);
+                $(".display-result").height(display_height);
+                $(".button-display").height(btn_height);//button takes up 90% of main view
+
+                $(".btn-num").height(btn_height * 0.16);//$(".btn-num").height(body_height/8);
+                $(".btn-num").width(body_width * 0.32);//$(".btn-num").width(body_width/3.09);
+                $(".cls").height(btn_height * 0.16);//$(".cls").height(body_height/8);
+                $(".cls").width(body_width * 0.32);//$(".cls").width(body_width/1.54);
+                $(".del").height(btn_height * 0.16);//$(".del").height(body_height/8);
+                $(".del").width(body_width * 0.32);//$(".del").width(body_width/1.54);
+$(".btn-pad").each(function(){
+var pre = $(this).html();
+$(this).html("<h6>" + pre + "</h6>")
+});
+
+
+$(".PrimeOut").css("font-size",display_height/4);
+$(".SecOut").css("font-size",display_height/3);
+          //  });
+
+        }
+    </script>
+</body>
+</html>
